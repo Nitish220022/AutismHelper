@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Communication Board</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #87CEEB; /* Sky Blue background color */
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1 {
+      text-align: center;
+      color: #4682B4; /* Steel Blue text color */
+    }
+
+    #pictureContainer {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 50px 0;
+    }
+
+    img {
+      display: block;
+      width: 200px;
+      height: 200px;
+      object-fit: cover;
+      margin: 10px;
+      border: 5px solid transparent;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    img:hover,
+    img:focus {
+      border-color: #FF6347; /* Tomato border color on hover/focus */
+    }
+
+    #pictureUpload {
+      display: block;
+      margin: 20px auto;
+    }
+
+    select,
+    button {
+      display: block;
+      margin: 20px auto;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      background-color: #FF6347; /* Tomato background color */
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    select:hover,
+    button:hover {
+      background-color: #228B22; /* Forest Green on hover */
+    }
+
+    button:focus {
+      outline: none;
+    }
+
+    #transcription {
+      font-size: 24px;
+      text-align: center;
+      margin-top: 50px;
+      color: #4682B4; /* Steel Blue text color */
+    }
+
+    img:focus {
+      border: 5px solid red;
+    }
+  </style>
+</head>
+<body>
+  <h1>Interactive Communication Board</h1>
+  
+  <div id="pictureContainer">
+    <img src="1.jpg" onclick="speak('I need help'); recordClick('picture1')">
+    <img src="3.jpg" onclick="speak('What is your name'); recordClick('picture2')">
+    <img src="2.jpg" onclick="speak('Hello! My name is Nitish'); recordClick('picture3')">
+  </div>
+
+  <input type="file" id="pictureUpload">
+  <button onclick="addPicture()">Add Picture</button>
+
+  <br><br>
+
+  <select id="languageSelect">
+    <option value="en-US">English</option>
+    <option value="hi-IN">Hindi</option>
+    <option value="te-IN">Telugu</option>
+  </select>
+
+  <button onclick="startSpeechRecognition()">Start Speech Recognition</button>
+  <p id="transcription"></p>
+
+  <script>
+    let clickedPictures = [];
+
+    function speak(text) {
+      const synth = window.speechSynthesis;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = document.getElementById('languageSelect').value;
+      synth.speak(utterance);
+    }
+
+    function recordClick(picture) {
+      clickedPictures.push(picture);
+    }
+
+    function addPicture() {
+      const fileInput = document.getElementById('pictureUpload');
+      const file = fileInput.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onloadend = function () {
+          const img = document.createElement('img');
+          img.src = reader.result;
+          img.onclick = function () {
+            speak('Custom message');
+          };
+          document.getElementById('pictureContainer').appendChild(img);
+        };
+      } else {
+        alert('Please select a valid image file.');
+      }
+    }
+
+    let recognition;
+    if ('webkitSpeechRecognition' in window) {
+      recognition = new window.webkitSpeechRecognition();
+    } else {
+      recognition = new window.SpeechRecognition();
+    }
+    recognition.continuous = true;
+    recognition.lang = 'en-US';
+
+    recognition.onresult = function (event) {
+      const transcription = event.results[event.results.length - 1][0].transcript;
+      document.getElementById('transcription').textContent = transcription;
+    };
+
+    function startSpeechRecognition() {
+      if (recognition) {
+        recognition.start();
+      }
+    }
+  </script>
+</body>
+</html>
